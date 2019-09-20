@@ -1,3 +1,5 @@
+// Python整数类型，实现居然用了5千多行，太可怕了
+
 /* Long (arbitrary precision) integer object implementation */
 
 /* XXX The functional organization of this file is terrible */
