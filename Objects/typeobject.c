@@ -3573,6 +3573,8 @@ type_is_gc(PyTypeObject *type)
     return type->tp_flags & Py_TPFLAGS_HEAPTYPE;
 }
 
+// 类型对象的类型 PyType_Type，用户自定义的class对应的PyTypeObject都是通过这个对象创建的
+// 所有class的class，metaclass, <type 'type'>
 PyTypeObject PyType_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "type",                                     /* tp_name */
@@ -4746,7 +4748,7 @@ static PyMethodDef object_methods[] = {
     {0}
 };
 
-
+// Python object类型
 PyTypeObject PyBaseObject_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
     "object",                                   /* tp_name */
@@ -4783,9 +4785,9 @@ PyTypeObject PyBaseObject_Type = {
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
     0,                                          /* tp_dictoffset */
-    object_init,                                /* tp_init */
+    object_init,                                /* tp_init 构造函数*/
     PyType_GenericAlloc,                        /* tp_alloc */
-    object_new,                                 /* tp_new */
+    object_new,                                 /* tp_new 相当于C++里的new操作符*/
     PyObject_Del,                               /* tp_free */
 };
 
@@ -7814,8 +7816,9 @@ super_traverse(PyObject *self, visitproc visit, void *arg)
     return 0;
 }
 
+// type对象
 PyTypeObject PySuper_Type = {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)  // type对象的类型是PyType_Type
     "super",                                    /* tp_name */
     sizeof(superobject),                        /* tp_basicsize */
     0,                                          /* tp_itemsize */

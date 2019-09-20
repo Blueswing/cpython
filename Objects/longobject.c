@@ -5377,7 +5377,7 @@ static PyNumberMethods long_as_number = {
 };
 
 PyTypeObject PyLong_Type = {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)      // 初始化head的宏
     "int",                                      /* tp_name */
     offsetof(PyLongObject, ob_digit),           /* tp_basicsize */
     sizeof(digit),                              /* tp_itemsize */
@@ -5413,9 +5413,9 @@ PyTypeObject PyLong_Type = {
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
     0,                                          /* tp_dictoffset */
-    0,                                          /* tp_init */
+    0,                                          /* tp_init 构造函数*/
     0,                                          /* tp_alloc */
-    long_new,                                   /* tp_new */
+    long_new,                                   /* tp_new new操作符*/
     PyObject_Del,                               /* tp_free */
 };
 

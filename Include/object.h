@@ -103,15 +103,18 @@ whose size is determined when the object is allocated.
  * by hand.  Similarly every pointer to a variable-size Python object can,
  * in addition, be cast to PyVarObject*.
  */
+
+// Python对象类型
 typedef struct _object {
     _PyObject_HEAD_EXTRA
-    Py_ssize_t ob_refcnt;
-    struct _typeobject *ob_type;
+    Py_ssize_t ob_refcnt;  // 64位windows中是64位int
+    struct _typeobject *ob_type;  // 对象的类型
 } PyObject;
 
+// 可变对象类型
 typedef struct {
     PyObject ob_base;
-    Py_ssize_t ob_size; /* Number of items in variable part */
+    Py_ssize_t ob_size; /* 元素的个数，不是字节数量Number of items in variable part */
 } PyVarObject;
 
 #define Py_REFCNT(ob)           (((PyObject*)(ob))->ob_refcnt)
@@ -300,7 +303,7 @@ typedef struct {
 
 typedef struct {
     lenfunc mp_length;
-    binaryfunc mp_subscript;
+    binaryfunc mp_subscript;  // d['a'] 操作，__getitem__
     objobjargproc mp_ass_subscript;
 } PyMappingMethods;
 
@@ -343,13 +346,14 @@ typedef PyObject *(*allocfunc)(struct _typeobject *, Py_ssize_t);
 #ifdef Py_LIMITED_API
 typedef struct _typeobject PyTypeObject; /* opaque */
 #else
+// Python**类型**对象，不会被析构！指向类型对象的指针不被视为类型对象的指针！
 typedef struct _typeobject {
-    PyObject_VAR_HEAD
-    const char *tp_name; /* For printing, in format "<module>.<name>" */
-    Py_ssize_t tp_basicsize, tp_itemsize; /* For allocation */
+    PyObject_VAR_HEAD  // PyVarObject
+    const char *tp_name; /* Python内部和DEBUG时打印用For printing, in format "<module>.<name>" */
+    Py_ssize_t tp_basicsize, tp_itemsize; /* 创建类型对象时分配的内存大小For allocation */
 
     /* Methods to implement standard operations */
-
+    // 内置函数
     destructor tp_dealloc;
     printfunc tp_print;
     getattrfunc tp_getattr;
@@ -359,10 +363,10 @@ typedef struct _typeobject {
     reprfunc tp_repr;
 
     /* Method suites for standard classes */
-
-    PyNumberMethods *tp_as_number;
-    PySequenceMethods *tp_as_sequence;
-    PyMappingMethods *tp_as_mapping;
+    // 三个重要函数!
+    PyNumberMethods *tp_as_number; // 数值对象支持的操作 long float
+    PySequenceMethods *tp_as_sequence; // 序列对象支持的操作 list
+    PyMappingMethods *tp_as_mapping; // 关联对象支持的操作 dict
 
     /* More standard operations (here for binary compatibility) */
 
@@ -791,10 +795,12 @@ PyAPI_FUNC(void) _Py_Dealloc(PyObject *);
 #endif
 #endif /* !Py_TRACE_REFS */
 
+// 引用计数增加
 #define Py_INCREF(op) (                         \
     _Py_INC_REFTOTAL  _Py_REF_DEBUG_COMMA       \
     ((PyObject *)(op))->ob_refcnt++)
 
+// 引用计数减少，减到0调用_Py_Dealloc析构，do while(0)是定义宏用到的技巧，不用管
 #define Py_DECREF(op)                                   \
     do {                                                \
         PyObject *_py_decref_tmp = (PyObject *)(op);    \

@@ -225,6 +225,12 @@ Py_DecRef(PyObject *o)
     Py_XDECREF(o);
 }
 
+
+/*
+PyObject_***是泛型API，Abstract object layer(AOL)，比如PyObject_Print，可以作用在任何对象上
+PyInt_***是类型相关API，Concrete object layer(COL)，比如PyInt_FromLong(10)，只能作用在Int上
+*/
+
 PyObject *
 PyObject_Init(PyObject *op, PyTypeObject *tp)
 {
@@ -1732,13 +1738,21 @@ PyObject _Py_NotImplementedStruct = {
     1, &_PyNotImplemented_Type
 };
 
+/* 这里有各种类型对象，一般有以下几类
+基本对象 type
+数字对象 long float bollean
+序列对象 string list tuple
+map对象 dict
+内部对象 function code frame module method
+...
+*/
 void
 _Py_ReadyTypes(void)
 {
-    if (PyType_Ready(&PyBaseObject_Type) < 0)
+    if (PyType_Ready(&PyBaseObject_Type) < 0) // object
         Py_FatalError("Can't initialize object type");
 
-    if (PyType_Ready(&PyType_Type) < 0)
+    if (PyType_Ready(&PyType_Type) < 0) // type
         Py_FatalError("Can't initialize type type");
 
     if (PyType_Ready(&_PyWeakref_RefType) < 0)
@@ -1922,6 +1936,7 @@ _Py_ReadyTypes(void)
 
 #ifdef Py_TRACE_REFS
 
+// 初始化引用计数为1
 void
 _Py_NewReference(PyObject *op)
 {
