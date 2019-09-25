@@ -2,6 +2,7 @@
 #define Py_PYMACRO_H
 
 /* Minimum value between x and y */
+// 多余的括号是为了防止使用的时候出现运算符优先级问题
 #define Py_MIN(x, y) (((x) > (y)) ? (y) : (x))
 
 /* Maximum value between x and y */

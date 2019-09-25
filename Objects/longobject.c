@@ -42,18 +42,22 @@ PyObject *_PyLong_One = NULL;
    The integers that are preallocated are those in the range
    -NSMALLNEGINTS (inclusive) to NSMALLPOSINTS (not inclusive).
 */
+// 预分配-5到256小整数
 static PyLongObject small_ints[NSMALLNEGINTS + NSMALLPOSINTS];
 #ifdef COUNT_ALLOCS
 Py_ssize_t quick_int_allocs, quick_neg_int_allocs;
 #endif
 
+// 获取小整数
 static PyObject *
 get_small_int(sdigit ival)
 {
     PyObject *v;
+    // 边界检查
     assert(-NSMALLNEGINTS <= ival && ival < NSMALLPOSINTS);
+    // 这里用了结构体指针类型转换，虽然small_ints[]是PyLongObject类型数组，这里v强制转成PyObject指针
     v = (PyObject *)&small_ints[ival + NSMALLNEGINTS];
-    Py_INCREF(v);
+    Py_INCREF(v); // 引用自增
 #ifdef COUNT_ALLOCS
     if (ival >= 0)
         quick_int_allocs++;
@@ -86,6 +90,7 @@ maybe_small_long(PyLongObject *v)
 
 /* If a freshly-allocated int is already shared, it must
    be a small integer, so negating it must go to PyLong_FromLong */
+// 取负值
 Py_LOCAL_INLINE(void)
 _PyLong_Negate(PyLongObject **x_p)
 {
@@ -142,6 +147,7 @@ long_normalize(PyLongObject *v)
    nb_int slot is not available or the result of the call to nb_int
    returns something not of type int.
 */
+// PyObject对象转PyLongObject对象，可能失败
 PyLongObject *
 _PyLong_FromNbInt(PyObject *integral)
 {
@@ -190,9 +196,11 @@ _PyLong_FromNbInt(PyObject *integral)
 /* Allocate a new int object with size digits.
    Return NULL and set exception if we run out of memory. */
 
+
+
 #define MAX_LONG_DIGITS \
     ((PY_SSIZE_T_MAX - offsetof(PyLongObject, ob_digit))/sizeof(digit))
-
+// 新建PyLongObject对象
 PyLongObject *
 _PyLong_New(Py_ssize_t size)
 {
@@ -216,6 +224,7 @@ _PyLong_New(Py_ssize_t size)
     return (PyLongObject*)PyObject_INIT_VAR(result, &PyLong_Type, size);
 }
 
+// 复制
 PyObject *
 _PyLong_Copy(PyLongObject *src)
 {
@@ -240,7 +249,7 @@ _PyLong_Copy(PyLongObject *src)
 }
 
 /* Create a new int object from a C long int */
-
+// 类型转换long->PyLongObject
 PyObject *
 PyLong_FromLong(long ival)
 {
@@ -310,7 +319,7 @@ PyLong_FromLong(long ival)
 }
 
 /* Create a new int object from a C unsigned long int */
-
+// 类型转换unsigned long->PyLongObject
 PyObject *
 PyLong_FromUnsignedLong(unsigned long ival)
 {
@@ -338,7 +347,7 @@ PyLong_FromUnsignedLong(unsigned long ival)
 }
 
 /* Create a new int object from a C double */
-
+// 类型转换double->PyLongObject
 PyObject *
 PyLong_FromDouble(double dval)
 {
@@ -400,7 +409,7 @@ PyLong_FromDouble(double dval)
    For other errors (e.g., TypeError), return -1 and set an error condition.
    In this case *overflow will be 0.
 */
-
+// 类型转换PyLongObject->long 可能overflow
 long
 PyLong_AsLongAndOverflow(PyObject *vv, int *overflow)
 {
@@ -479,7 +488,7 @@ PyLong_AsLongAndOverflow(PyObject *vv, int *overflow)
 
 /* Get a C long int from an int object or any object that has an __int__
    method.  Return -1 and set an error if overflow occurs. */
-
+// 类型转换PyLongObject->long 可能overflow
 long
 PyLong_AsLong(PyObject *obj)
 {
@@ -496,7 +505,7 @@ PyLong_AsLong(PyObject *obj)
 
 /* Get a C int from an int object or any object that has an __int__
    method.  Return -1 and set an error if overflow occurs. */
-
+// 类型转换PyLongObject->int 可能overflow
 int
 _PyLong_AsInt(PyObject *obj)
 {
@@ -514,7 +523,7 @@ _PyLong_AsInt(PyObject *obj)
 
 /* Get a Py_ssize_t from an int object.
    Returns -1 and sets an error condition if overflow occurs. */
-
+// 类型转换PyLongObject->ssize_t 可能overflow
 Py_ssize_t
 PyLong_AsSsize_t(PyObject *vv) {
     PyLongObject *v;
@@ -569,7 +578,7 @@ PyLong_AsSsize_t(PyObject *vv) {
 
 /* Get a C unsigned long int from an int object.
    Returns -1 and sets an error condition if overflow occurs. */
-
+// 类型转换PyLongObject->unsighed long 可能overflow
 unsigned long
 PyLong_AsUnsignedLong(PyObject *vv)
 {
@@ -613,7 +622,7 @@ PyLong_AsUnsignedLong(PyObject *vv)
 
 /* Get a C size_t from an int object. Returns (size_t)-1 and sets
    an error condition if overflow occurs. */
-
+// 类型转换PyLongObject->size_t 可能overflow
 size_t
 PyLong_AsSize_t(PyObject *vv)
 {
@@ -3272,6 +3281,7 @@ static PyLongObject *k_lopsided_mul(PyLongObject *a, PyLongObject *b);
  * absolute value of the product (or NULL if error).
  * See Knuth Vol. 2 Chapter 4.3.3 (Pp. 294-295).
  */
+// Karatsuba算法 快速相乘 这是一种数论算法
 static PyLongObject *
 k_mul(PyLongObject *a, PyLongObject *b)
 {
@@ -3308,6 +3318,7 @@ k_mul(PyLongObject *a, PyLongObject *b)
     }
 
     /* Use gradeschool math when either number is too small. */
+    // 对于比较小的数直接相乘
     i = a == b ? KARATSUBA_SQUARE_CUTOFF : KARATSUBA_CUTOFF;
     if (asize <= i) {
         if (asize == 0)
