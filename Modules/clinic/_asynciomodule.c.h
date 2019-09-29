@@ -261,6 +261,7 @@ PyDoc_STRVAR(_asyncio_Task___init____doc__,
 static int
 _asyncio_Task___init___impl(TaskObj *self, PyObject *coro, PyObject *loop);
 
+// self: 新的Task对象, coro:协程对象, loop EventLoop
 static int
 _asyncio_Task___init__(PyObject *self, PyObject *args, PyObject *kwargs)
 {

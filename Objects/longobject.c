@@ -6,7 +6,7 @@
 
 #include "Python.h"
 #include "longintrepr.h"
-
+#include <stdio.h>
 #include <float.h>
 #include <ctype.h>
 #include <stddef.h>
@@ -215,6 +215,7 @@ _PyLong_New(Py_ssize_t size)
                         "too many digits in integer");
         return NULL;
     }
+    // 分配内存
     result = PyObject_MALLOC(offsetof(PyLongObject, ob_digit) +
                              size*sizeof(digit));
     if (!result) {
@@ -249,7 +250,7 @@ _PyLong_Copy(PyLongObject *src)
 }
 
 /* Create a new int object from a C long int */
-// 类型转换long->PyLongObject
+// 用long创建PyLongObject
 PyObject *
 PyLong_FromLong(long ival)
 {
@@ -259,6 +260,7 @@ PyLong_FromLong(long ival)
     int ndigits = 0;
     int sign;
 
+    //小整数
     CHECK_SMALL_INT(ival);
 
     if (ival < 0) {
@@ -319,7 +321,7 @@ PyLong_FromLong(long ival)
 }
 
 /* Create a new int object from a C unsigned long int */
-// 类型转换unsigned long->PyLongObject
+// 用unsigned long创建PyLongObject
 PyObject *
 PyLong_FromUnsignedLong(unsigned long ival)
 {
@@ -333,9 +335,9 @@ PyLong_FromUnsignedLong(unsigned long ival)
     t = ival;
     while (t) {
         ++ndigits;
-        t >>= PyLong_SHIFT;
+        t >>= PyLong_SHIFT;  // 位移
     }
-    v = _PyLong_New(ndigits);
+    v = _PyLong_New(ndigits);  // 创建ndigits位整数
     if (v != NULL) {
         digit *p = v->ob_digit;
         while (ival) {
@@ -347,7 +349,7 @@ PyLong_FromUnsignedLong(unsigned long ival)
 }
 
 /* Create a new int object from a C double */
-// 类型转换double->PyLongObject
+// 用double创建PyLongObject
 PyObject *
 PyLong_FromDouble(double dval)
 {
@@ -2907,6 +2909,7 @@ long_dealloc(PyObject *v)
     Py_TYPE(v)->tp_free(v);
 }
 
+// 比较大小
 static int
 long_compare(PyLongObject *a, PyLongObject *b)
 {
@@ -3090,12 +3093,13 @@ x_sub(PyLongObject *a, PyLongObject *b)
     return long_normalize(z);
 }
 
+// 整型加法运算
 static PyObject *
 long_add(PyLongObject *a, PyLongObject *b)
 {
     PyLongObject *z;
-
-    CHECK_BINOP(a, b);
+    // 二元运算符检查
+    CHECK_BINOP(a, b);  
 
     if (Py_ABS(Py_SIZE(a)) <= 1 && Py_ABS(Py_SIZE(b)) <= 1) {
         return PyLong_FromLong(MEDIUM_VALUE(a) + MEDIUM_VALUE(b));
@@ -5389,6 +5393,7 @@ static PyNumberMethods long_as_number = {
     long_long,                  /* nb_index */
 };
 
+// Long类型对象，Long对象的元信息
 PyTypeObject PyLong_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)      // 初始化head的宏
     "int",                                      /* tp_name */
@@ -5400,7 +5405,7 @@ PyTypeObject PyLong_Type = {
     0,                                          /* tp_setattr */
     0,                                          /* tp_reserved */
     long_to_decimal_string,                     /* tp_repr */
-    &long_as_number,                            /* tp_as_number */
+    &long_as_number,                            /* 数值对象所有操作 tp_as_number */
     0,                                          /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
     (hashfunc)long_hash,                        /* tp_hash */
@@ -5411,7 +5416,7 @@ PyTypeObject PyLong_Type = {
     0,                                          /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE |
         Py_TPFLAGS_LONG_SUBCLASS,               /* tp_flags */
-    long_doc,                                   /* tp_doc */
+    long_doc,                                   /* 文档 tp_doc */
     0,                                          /* tp_traverse */
     0,                                          /* tp_clear */
     long_richcompare,                           /* tp_richcompare */

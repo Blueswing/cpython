@@ -82,8 +82,11 @@ typedef long stwodigits; /* signed variant of twodigits */
    aware that ints abuse  ob_size's sign bit.
 */
 
+// long对象类
 struct _longobject {
+    // 可变对象head
     PyObject_VAR_HEAD
+    // unsigned int数组
     digit ob_digit[1];
 };
 
